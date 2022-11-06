@@ -1,10 +1,11 @@
 package main
 
 import (
-  "fmt"
-  "net"
-  "log"
-  "bufio"
+	"bufio"
+	"fmt"
+	"log"
+	"net"
+	"strings"
 )
 
 type client chan<- string // canal de mensagem
@@ -49,10 +50,28 @@ func handleConn(conn net.Conn) {
   entering <- ch
 
   input := bufio.NewScanner(conn)
+  
+  // Criar o Swith Case pra cada comando a partir daqui
+  
   for input.Scan() {
-    messages <- apelido + ":" + input.Text()
-  }
+    cmd := strings.Split(input.Text(), " ")
+    comando := cmd[0]
+    msg := cmd[1]
+    fmt.Println("Comando: "+ comando)
 
+    switch comando {
+    case "/nick":
+      fmt.Println("Mudamos o nome de " + apelido + " para " + msg)
+      messages <- "O nome de " + apelido + " foi trocado para " + msg
+      apelido = msg
+    case "/quit":
+      // leaving <- ch
+      // messages <- apelido + " se foi "
+    default:
+      fmt.Println("Enviado uma mensagem")
+      messages <- apelido + ":" + input.Text()
+    }
+  }
   leaving <- ch
   messages <- apelido + " se foi "
   conn.Close()
