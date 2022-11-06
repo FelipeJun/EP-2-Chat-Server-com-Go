@@ -56,14 +56,13 @@ func handleConn(conn net.Conn) {
   for input.Scan() {
     cmd := strings.Split(input.Text(), " ")
     comando := cmd[0]
-    msg := cmd[1]
     fmt.Println("Comando: "+ comando)
 
     switch comando {
     case "/nick":
-      fmt.Println("Mudamos o nome de " + apelido + " para " + msg)
-      messages <- "O nome de " + apelido + " foi trocado para " + msg
-      apelido = msg
+      fmt.Println("Mudamos o nome de " + apelido + " para " + cmd[1])
+      messages <- "O nome de " + apelido + " foi trocado para " + cmd[1]
+      apelido = cmd[1]
     case "/quit":
       // leaving <- ch
       // messages <- apelido + " se foi "
