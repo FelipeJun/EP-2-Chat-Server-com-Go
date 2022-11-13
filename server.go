@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"strings"
+	"strings"  
 )
 
 type client chan<- string // canal de mensagem
@@ -14,6 +14,7 @@ var (
   entering = make(chan client)
   leaving = make(chan client)
   messages = make(chan string)
+  private = make(chan string)
 )
 
 func broadcaster() {
@@ -23,6 +24,7 @@ func broadcaster() {
       case msg := <-messages:
         // broadcast de mensagens. Envio para todos
         for cli := range clients {
+          fmt.Println(cli)
           cli <- msg
         }
       case cli := <-entering:
@@ -52,7 +54,7 @@ func handleConn(conn net.Conn) {
   input := bufio.NewScanner(conn)
   
   // Criar o Swith Case pra cada comando a partir daqui
-  
+  // /send otavio tudo bem?
   for input.Scan() {
     cmd := strings.Split(input.Text(), " ")
     comando := cmd[0]
@@ -63,17 +65,24 @@ func handleConn(conn net.Conn) {
       fmt.Println("Mudamos o nome de " + apelido + " para " + cmd[1])
       messages <- "O nome de " + apelido + " foi trocado para " + cmd[1]
       apelido = cmd[1]
+    case "/send":
+      msgPrivate := strings.SplitN(input.Text()," ",3)
+      fmt.Println("Enviando mensagem direta para: " + msgPrivate[1])
+      fmt.Println("Enviando mensagem: " + msgPrivate[2])
     case "/quit":
-      // leaving <- ch
-      // messages <- apelido + " se foi "
+      leaving <- ch
+      fmt.Println(apelido + " se foi ")
+      messages <- apelido + " se foi " 
+      return
+
     default:
       fmt.Println("Enviado uma mensagem")
       messages <- apelido + ":" + input.Text()
+      // kill := exec.Command("taskkill")
     }
   }
-  leaving <- ch
-  messages <- apelido + " se foi "
   conn.Close()
+  
 }
 
 func main() {
