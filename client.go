@@ -1,5 +1,5 @@
 package main
-
+// Tamo acabando viado, bora pra cima Corinthians!
 import (
   "net"
   "os"
