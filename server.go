@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"strings"  
+	"strings"
+  "io"
 )
 
 type client chan<- string // canal de mensagem
@@ -18,7 +19,7 @@ var (
 	chans = make(map[string]client)
 )
 
-func broadcaster() {
+func caster() {
 	// não entendo essa linha abaixo
   clients := make(map[client]bool) // todos os clientes conectados
 
@@ -37,14 +38,14 @@ func broadcaster() {
 			case msg := <-private:
         // [0]-transmisor [1]-comando [2]-receptor [3]-mensagem
 				msgPrivate := strings.SplitN(msg," ",4)
-        tranmisor:= msgPrivate[0]
+        transmissor:= msgPrivate[0]
 				receptor := msgPrivate[2]
         message := msgPrivate[3]
 				canal := chans[receptor]
 				for key, _ := range clients {
 					if (key == canal){
-            fmt.Println( "Recebendo: "+ receptor)
-						key <- tranmisor + "sussurou" + ": " + message
+            fmt.Println( transmissor + " sussurrou para "+ receptor)
+						key <- transmissor + " sussurrou" + ": " + message
 					}
         }
     }
@@ -60,15 +61,22 @@ func clientWriter(conn net.Conn, ch <-chan string) {
 func handleConn(conn net.Conn) {
   ch := make(chan string)
   go clientWriter(conn, ch)
-
-  apelido := conn.RemoteAddr().String()
+  // Lê o Write enviado do cliente/bot para pegar o nome
+  buf := make([]byte, 1024)
+  n, err := conn.Read(buf)
+  if err != nil {
+    if err != io.EOF {
+      fmt.Printf("Read error - %s\n", err)
+    }
+  }
+  // apelido := conn.RemoteAddr().String()
+  apelido := string(buf[:n])
   ch <- "vc é " + apelido
   messages <- apelido + " chegou!"
   entering <- ch
-
+  chans[apelido] = ch
 
   input := bufio.NewScanner(conn)
-  
   for input.Scan() {
     cmd := strings.Split(input.Text(), " ")
     comando := cmd[0]
@@ -82,7 +90,8 @@ func handleConn(conn net.Conn) {
 			private <- apelido + " " + input.Text()
     case "/quit":
       leaving <- ch
-      messages <- apelido + " se foi " 
+      messages <- apelido + " se foi "
+      delete(chans,apelido)
       return
     default:
       fmt.Println("Enviado uma mensagem")
@@ -100,7 +109,7 @@ func main() {
     log.Fatal(err)
   }
 
-  go broadcaster()
+  go caster()
 
 	for {
     conn, err := listener.Accept()

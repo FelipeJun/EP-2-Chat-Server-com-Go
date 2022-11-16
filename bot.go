@@ -7,7 +7,6 @@ import (
   "log"
   "fmt"
   "sync"
-  "bufio"
 )
 
 func mustCopy(dst io.Writer, src io.Reader) {
@@ -24,12 +23,9 @@ func main() {
 	log.Fatal(err)
 	}
 	done:= make(chan struct{})
-  fmt.Print("digite um nome: ")
-    input := bufio.NewScanner(os.Stdin)
-    input.Scan()
 	wg.Add(1)
 	go func() {
-		conn.Write([]byte(input.Text()))
+		conn.Write([]byte("Bot"))
 		wg.Done()
 	}()
 	wg.Wait()
