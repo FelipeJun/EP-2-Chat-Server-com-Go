@@ -26,7 +26,7 @@ func main() {
 	done := make(chan struct{})
 	wg.Add(1)
 	go func() {
-		conn.Write([]byte("Bot"))
+		conn.Write([]byte("bot"))
 		wg.Done()
 	}()
 	wg.Wait()

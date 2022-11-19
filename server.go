@@ -32,7 +32,7 @@ func caster() {
 	for {
 		select {
 		case msg := <-messages:
-			// broadcast de mensagens. Envio para todos
+			// Envio para todos
 			for cli := range clients {
 				cli <- msg
 			}
@@ -47,15 +47,29 @@ func caster() {
 			transmissor := msgPrivate[0]
 			receptor := msgPrivate[2]
 			message := msgPrivate[3]
-			// Rodar o bot aq em baixo, caso bot receba mensagem, ja retorna a msg
-			// reversada
-			canal := chans[receptor]
+			enviada := false
+
+	
 			for key, _ := range clients {
-				if key == canal {
+				if key == chans[receptor] && receptor != "bot"{
+					enviada = true
 					fmt.Println(transmissor + " sussurrou para " + receptor)
-					key <- transmissor + " sussurrou: " + message
+					chans[receptor] <- transmissor + " sussurrou: " + message
+					break
+				}
+				if key == chans[receptor] && receptor == "bot"{
+					enviada = true
+					message = reverse(message)
+					chans[transmissor] <- receptor + " retornou: " + message
+					break
 				}
 			}
+
+			if (!enviada){
+				chans[transmissor] <- "O cliente não existe, doido!"
+			}
+
+
 		}
 	}
 }
