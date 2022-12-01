@@ -1,7 +1,7 @@
 # EP-2-Chat-Server-com-Go
 EP 2 de Paradigmas de programação
 
-Neste trabalho, foi dado como foi passado como base o seguinte programa:
+Neste trabalho, foi dado como base o seguinte programa:
 
 https://github.com/senac-paradigmas/corrotinas-go
 
