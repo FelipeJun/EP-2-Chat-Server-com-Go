@@ -84,7 +84,7 @@ func handleConn(conn net.Conn) {
 	ch := make(chan string)
 	go clientWriter(conn, ch)
 
-	// Lê o Write enviado do cliente/bot para pegar o nome
+	// Lê o Write enviado do cliente/bot para atribuir o nome
 	buf := make([]byte, 1024)
 	n, err := conn.Read(buf)
 	if err != nil {
